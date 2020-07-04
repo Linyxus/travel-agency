@@ -1,0 +1,9 @@
+2
+Beijing 2 10 20
+Shanghai 1 20 10
+
+4
+0 1 air 8 1
+1 0 subway 10 2
+0 1 highway 7 3
+1 0 air 20 2

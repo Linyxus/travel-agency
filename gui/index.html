@@ -1,0 +1,245 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>旅行规划系统</title>
+    <!--Import Google Icon Font-->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!--Import materialize.css-->
+    <link type="text/css" rel="stylesheet" href="css/materialize.min.css" media="screen,projection" />
+    <link type="text/css" rel="stylesheet" href="css/app.css" media="screen,projection" />
+    <script type="text/javascript" src="js/vue.min.js"></script>
+
+    <!--Let browser know website is optimized for mobile-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+</head>
+
+<body>
+    <div id="container">
+        <div id="map">
+        </div>
+        <div id="sidebar">
+            <div class="fixed-action-btn">
+                <a id="btn_add-journey" v-bind:class="addButtonClass" v-on:click="handleAddButtonClick">
+                    <i class="large material-icons">add</i>
+                </a>
+            </div>
+            <h4 class='center'>
+                Traveling Agent<span style="font-size: 0.5em">v0.0.2</span>
+            </h4>
+            <h5 class='center'>
+                Day 0 10:00
+            </h5>
+            <h5 class='center'>
+                Settings
+            </h5>
+            <div class="switch settings-switch">
+                <label>
+                    隐藏
+                    <input id="input_show-all-circuits" checked type="checkbox">
+                    <span class="lever"></span>
+                    显示所有交通线路
+                </label>
+            </div><br />
+            <div class="switch settings-switch">
+                <label>
+                    隐藏
+                    <input id="input_show-all-journey" checked type="checkbox">
+                    <span class="lever"></span>
+                    显示所有旅行中的路线
+                </label>
+            </div><br />
+            <div class="switch settings-switch">
+                <label>
+                    暂停
+                    <input id="input_run" type="checkbox" v-model="running" v-bind:disabled="addingJourney">
+                    <span class="lever"></span>
+                    运行
+                </label>
+            </div>
+            <h5 class='center'>
+                Ongoing journeys
+            </h5>
+            <ul id='journey-list' class="collapsible journey-list">
+                <li v-for="journey in journeys" v-bind:id="journey.id" :key="journey.id">
+                    <div class="collapsible-header waves-effect waves-light journey-list-item">
+                        <div class="journey-col">
+                            <div class="journey-field">旅客编号</div>
+                            <div class="journey-value">{{ journey.traveler }}</div>
+                        </div>
+                        <div class="journey-col">
+                            <div class="journey-field">出发地</div>
+                            <div class="journey-value">{{ journey.src }}</div>
+                        </div>
+                        <div class="journey-col">
+                            <div class="journey-desc-time">时长 {{ journey.duration }}h</div>
+                            <div class="journey-desc-risk">风险 {{ journey.risk }}</div>
+                        </div>
+                        <div class="journey-col">
+                            <div class="journey-field">目的地</div>
+                            <div class="journey-value">{{ journey.dest }}</div>
+                        </div>
+                    </div>
+                    <div class="collapsible-body journey-content">
+                        <div class="journey-step-container" v-for="(step, index) in journey.path">
+                            <div class="journey-step-number">#{{ index + 1 }}</div>
+                            <div class="journey-step journey-step-active" v-if="step.active">
+                                <div class="journey-col">
+                                    <div class="journey-field">交通工具</div>
+                                    <div class="journey-value">{{ typeNames[step.type] }}</div>
+                                </div>
+                                <div class="journey-col">
+                                    <div class="journey-field">出发地</div>
+                                    <div class="journey-value">{{ step.src }}</div>
+                                </div>
+                                <div class="journey-col">
+                                    <div class="journey-desc-time">时长 {{ step.duration }}h</div>
+                                    <div class="journey-desc-risk">风险 {{ step.risk }}</div>
+                                </div>
+                                <div class="journey-col">
+                                    <div class="journey-field">目的地</div>
+                                    <div class="journey-value">{{ step.dest }}</div>
+                                </div>
+                            </div>
+                            <div class="journey-step" v-else>
+                                <div class="journey-col">
+                                    <div class="journey-field">交通工具</div>
+                                    <div class="journey-value">{{ typeNames[step.type] }}</div>
+                                </div>
+                                <div class="journey-col">
+                                    <div class="journey-field">出发地</div>
+                                    <div class="journey-value">{{ step.src }}</div>
+                                </div>
+                                <div class="journey-col">
+                                    <div class="journey-desc-time">时长 {{ step.duration }}h</div>
+                                    <div class="journey-desc-risk">风险 {{ step.risk }}</div>
+                                </div>
+                                <div class="journey-col">
+                                    <div class="journey-field">目的地</div>
+                                    <div class="journey-value">{{ step.dest }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+            <!-- <div id='add-journey-card' v-bind:class="addJourneyCardClass">
+                <div class="card-content">
+                    <span class="card-title">添加新的旅程</span>
+                    <div class="row">
+                        <div class="input-field col s12">
+                            <input disabled value="010" id="input_traveler-id" type="text" class="validate">
+                            <label for="disabled">旅客编号</label>
+                        </div>
+                        <div class="input-field col s12">
+                            <select v-model="newJourney.src">
+                                <option v-for="city in cities" value="city.name">{{ city.name }}</option>
+                            </select>
+                            <label>出发地</label>
+                        </div>
+                        <div class="input-field col s12">
+                            <select v-model="newJourney.dest">
+                                <option v-for="city in cities" value="city.name">{{ city.name }}</option>
+                            </select>
+                            <label>目的地</label>
+                        </div>
+                        <div class="input-field col s12">
+                            <select>
+                                <option value="1">10:00</option>
+                                <option value="2">11:00</option>
+                                <option value="3">12:00</option>
+                            </select>
+                            <label>出发时间</label>
+                        </div>
+                        <div class="input-field col s12 add-journey-strategy-box">
+                            <span class="add-journey-strategy-label">
+                                策略
+                            </span>
+                            <p>
+                                <label>
+                                    <input name="group1" type="radio" checked />
+                                    <span>最小风险</span>
+                                </label>
+                            </p>
+                            <p>
+                                <label>
+                                    <input name="group1" type="radio" />
+                                    <span>限时最小风险</span>
+                                </label>
+                            </p>
+                        </div>
+                        <div class="offset-s4 col s4">
+                            <a class="waves-effect blue waves-light btn-small"
+                                v-on:click="handleAddCancelButtonClick">取消</a>
+                        </div>
+                        <div class="col s4">
+                            <a class="waves-effect blue waves-light btn-small">添加</a>
+                        </div>
+                    </div>
+                </div>
+            </div> -->
+
+            <!-- Add modal window -->
+            <div id="modal_add-journey" class="modal modal-fixed-footer">
+                <div class="modal-content">
+                    <h4>添加新的旅程</h4>
+                    <div class="row">
+                        <div class="input-field col s12">
+                            <input disabled value="010" id="input_traveler-id" type="text" class="validate">
+                            <label for="disabled">旅客编号</label>
+                        </div>
+                        <div class="input-field col s12">
+                            <select v-model="newJourney.src">
+                                <option v-for="city in cities" value="city.name">{{ city.name }}</option>
+                            </select>
+                            <label>出发地</label>
+                        </div>
+                        <div class="input-field col s12">
+                            <select v-model="newJourney.dest">
+                                <option v-for="city in cities" value="city.name">{{ city.name }}</option>
+                            </select>
+                            <label>目的地</label>
+                        </div>
+                        <div class="input-field col s12">
+                            <select>
+                                <option value="1">10:00</option>
+                                <option value="2">11:00</option>
+                                <option value="3">12:00</option>
+                            </select>
+                            <label>出发时间</label>
+                        </div>
+                        <div class="input-field col s12 add-journey-strategy-box">
+                            <span class="add-journey-strategy-label">
+                                策略
+                            </span>
+                            <p>
+                                <label>
+                                    <input name="group1" type="radio" checked />
+                                    <span>最小风险</span>
+                                </label>
+                            </p>
+                            <p>
+                                <label>
+                                    <input name="group1" type="radio" />
+                                    <span>限时最小风险</span>
+                                </label>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <a class="waves-effect waves-green btn-flat" v-on:click="handleAddCancelButtonClick">取消</a>
+                    <a class="waves-effect waves-green btn-flat">添加</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript" src="js/materialize.min.js"></script>
+    <script type="text/javascript" src="js/utils.js"></script>
+    <script type="text/javascript" src="https://webapi.amap.com/maps?v=2.0&key=a96eee34f2488a56c10d77a3888018db">
+    </script>
+    <script type="text/javascript" src="js/app.js"></script>
+</body>
+
+</html>

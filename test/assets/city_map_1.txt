@@ -1,0 +1,6 @@
+3
+Beijing 2 10 20
+Shanghai 1 20 10
+Wuxi 0 5 0
+
+0
