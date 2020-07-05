@@ -34,6 +34,7 @@ void deinit_solver(solver_t *solver);
 
 int get_journey_src(journey_t *journey);
 int get_journey_dest(journey_t *journey);
+int get_journey_dep_time(journey_t *journey);
 int get_journey_length(journey_t *journey);
 double get_journey_risk(journey_t *journey);
 int_vector_t *get_journey_route(journey_t *journey);

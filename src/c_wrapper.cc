@@ -124,6 +124,12 @@ double get_journey_risk(journey_t *journey) {
     return pj->risk();
 }
 
+int get_journey_dep_time(journey_t *journey) {
+    auto pj = reinterpret_cast<tagc::Journey *>(journey);
+
+    return pj->dep_time();
+}
+
 int_vector_t *get_journey_route(journey_t *journey) {
     auto pj = reinterpret_cast<tagc::Journey *>(journey);
 
