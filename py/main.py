@@ -58,7 +58,7 @@ def line_list():
 def journey_list():
     return json.dumps({
         'type': 'list journey reply',
-        'data': [conv_journey_record(agency.plan[jid]) for jid in agency.journey_list]
+        'data': [conv_journey_record(agency.planed_journey[jid]) for jid in agency.journey_list]
     })
 
 
@@ -112,7 +112,7 @@ async def list_line_reply(ws):
 
 async def list_journey_reply(ws):
     logging.info('send response <list journey reply>')
-    ws.send(journey_list())
+    await ws.send(journey_list())
 
 
 async def plan_reply(ws, info):
@@ -120,8 +120,10 @@ async def plan_reply(ws, info):
     data = plan(info)
     await ws.send(data)
 
+
 def add_journey(jid):
     agency.journey_list.append(jid)
+
 
 async def serve(ws, path):
     register(ws)
@@ -145,13 +147,18 @@ async def serve(ws, path):
 if __name__ == '__main__':
     parser = ArgumentParser()
     parser.add_argument('--map', type=str,
-                        default='../test/assets/city_map_cn.txt')
+                        default='../assets/city_map_full.txt')
     args = parser.parse_args()
 
     agency = AgencyServer(args.map)
+    logging.info(
+        f'load city map, {len(agency.city_map.cities)} cities, {len(agency.city_map.lines)} lines')
 
     start_server = websockets.serve(serve, '127.0.0.1', 5678)
     logging.info('start websocket server')
+
+    rec = agency.plan('001', 0, 4, 0, 8, 'min_risk')
+    add_journey(rec.jid)
 
     asyncio.get_event_loop().run_until_complete(start_server)
     asyncio.get_event_loop().run_forever()

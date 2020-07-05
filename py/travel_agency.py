@@ -1,5 +1,6 @@
 from collections import namedtuple
 from enum import Enum
+import logging
 
 from _travel_agency import lib
 
@@ -72,6 +73,7 @@ class MinRiskJourneySolver:
         self.handle = lib.init_min_risk_spfa_solver(city_map.handle)
 
     def __call__(self, src, dep_time, dest):
+        logging.info(f'running solver for {dep_time}:00 {src} --> {dest}')
         pj = lib.run_solver(self.handle, src, dep_time, dest)
         return Journey(pj)
 

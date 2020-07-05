@@ -10,9 +10,9 @@ class AgencyServer:
         self.mr_spfa_solver = MinRiskJourneySolver(self.city_map)
 
     def plan(self, tid, src, dest, day, dep_time, strategy):
-        self.jid = self.jid + 1
+        self.next_jid = self.next_jid + 1
         if strategy == 'min_risk':
-            journey = self.mr_spfa_solver(src, dest, dep_time)
+            journey = self.mr_spfa_solver(src, dep_time, dest)
             rec = JourneyRecord(jid=f'journey-{self.next_jid}', tid=tid, day=day, journey=journey)
             self.planed_journey[rec.jid] = rec
 
