@@ -87,6 +87,10 @@ lib.get_journey_dest.restype = ctypes.c_int
 lib.get_journey_length.argtypes = [ctypes.c_void_p]
 lib.get_journey_length.restype = ctypes.c_int
 
+# get_journey_dep_time
+lib.get_journey_dep_time.argtypes = [ctypes.c_void_p]
+lib.get_journey_dep_time.restype = ctypes.c_int
+
 # get_journey_risk
 # double get_journey_risk(journey_t *journey);
 lib.get_journey_risk.argtypes = [ctypes.c_void_p]

@@ -61,6 +61,7 @@ class Journey:
         self.length = lib.get_journey_length(self.handle)
         self.risk = lib.get_journey_risk(self.handle)
         self.route = vec_to_list(lib.get_journey_route(self.handle))
+        self.dep_time = lib.get_journey_dep_time(self.handle)
 
     def free(self):
         lib.deinit_journey(self.handle)
@@ -77,4 +78,4 @@ class MinRiskJourneySolver:
     def free(self):
         lib.deinit_solver(self.handle)
 
-JourneyRecord = namedtuple('JourneyRecord', ['tid', 'journey'])
+JourneyRecord = namedtuple('JourneyRecord', ['tid', 'journey', 'day', 'jid'])
