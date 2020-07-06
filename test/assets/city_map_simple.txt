@@ -9,4 +9,4 @@ D 1 0 0
 0 2 air 7 1
 1 2 highway 9 1
 1 3 subway 10 2
-2 3 highway 10 1
+2 3 highway 10 3
