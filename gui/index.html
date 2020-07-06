@@ -25,15 +25,15 @@
                 </a>
             </div>
             <h4 class='center'>
-                Traveling Agent<span style="font-size: 0.5em">v0.0.2</span>
+                Travel Agency<span style="font-size: 0.5em">v0.0.3</span>
             </h4>
             <h5 class='center'>
-                Day 0 10:00
+                Day {{ now.day }} {{ now.time }}:00
             </h5>
             <h5 class='center'>
                 Settings
             </h5>
-            <div class="switch settings-switch">
+            <!-- <div class="switch settings-switch">
                 <label>
                     隐藏
                     <input id="input_show-all-circuits" checked type="checkbox">
@@ -48,7 +48,7 @@
                     <span class="lever"></span>
                     显示所有旅行中的路线
                 </label>
-            </div><br />
+            </div><br /> -->
             <div class="switch settings-switch">
                 <label>
                     暂停
@@ -58,67 +58,67 @@
                 </label>
             </div>
             <h5 class='center'>
-                Ongoing journeys
+                Journeys
             </h5>
             <ul id='journey-list' class="collapsible journey-list">
-                <li v-for="journey in journeys" v-bind:id="journey.id" :key="journey.id">
+                <li v-for="journey in processedJourneys" v-bind:id="journey.jid" :key="journey.jid">
                     <div class="collapsible-header waves-effect waves-light journey-list-item">
                         <div class="journey-col">
                             <div class="journey-field">旅客编号</div>
-                            <div class="journey-value">{{ journey.traveler }}</div>
+                            <div class="journey-value">{{ journey.tid }}</div>
                         </div>
                         <div class="journey-col">
-                            <div class="journey-field">出发地</div>
-                            <div class="journey-value">{{ journey.src }}</div>
+                            <div class="journey-field">day {{ journey.day }}, {{ journey.dep_time }}:00</div>
+                            <div class="journey-value">{{ journey.src.name }}</div>
                         </div>
                         <div class="journey-col">
-                            <div class="journey-desc-time">时长 {{ journey.duration }}h</div>
+                            <div class="journey-desc-time">时长 {{ journey.length }}h</div>
                             <div class="journey-desc-risk">风险 {{ journey.risk }}</div>
                         </div>
                         <div class="journey-col">
-                            <div class="journey-field">目的地</div>
-                            <div class="journey-value">{{ journey.dest }}</div>
+                            <div class="journey-field">day {{ journey.arrive_day }}, {{ journey.arrive_time }}:00</div>
+                            <div class="journey-value">{{ journey.dest.name }}</div>
                         </div>
                     </div>
                     <div class="collapsible-body journey-content">
-                        <div class="journey-step-container" v-for="(step, index) in journey.path">
+                        <div class="journey-step-container" v-for="(step, index) in journey.route">
                             <div class="journey-step-number">#{{ index + 1 }}</div>
-                            <div class="journey-step journey-step-active" v-if="step.active">
+                            <div v-bind:class="classOfStepStatus[step.status]">
                                 <div class="journey-col">
                                     <div class="journey-field">交通工具</div>
                                     <div class="journey-value">{{ typeNames[step.type] }}</div>
                                 </div>
                                 <div class="journey-col">
-                                    <div class="journey-field">出发地</div>
-                                    <div class="journey-value">{{ step.src }}</div>
+                                    <div class="journey-field">{{ step.dep_time }}:00</div>
+                                    <div class="journey-value">{{ step.from.name }}</div>
                                 </div>
                                 <div class="journey-col">
                                     <div class="journey-desc-time">时长 {{ step.duration }}h</div>
                                     <div class="journey-desc-risk">风险 {{ step.risk }}</div>
                                 </div>
                                 <div class="journey-col">
-                                    <div class="journey-field">目的地</div>
-                                    <div class="journey-value">{{ step.dest }}</div>
+                                    <div class="journey-field">{{ step.arrive_time }}:00</div>
+                                    <div class="journey-value">{{ step.to.name }}</div>
                                 </div>
                             </div>
-                            <div class="journey-step" v-else>
+                            <!-- <div class="journey-step journey-step-finished" v-else>
                                 <div class="journey-col">
                                     <div class="journey-field">交通工具</div>
                                     <div class="journey-value">{{ typeNames[step.type] }}</div>
                                 </div>
                                 <div class="journey-col">
-                                    <div class="journey-field">出发地</div>
-                                    <div class="journey-value">{{ step.src }}</div>
+                                    <div class="journey-field">{{ step.dep_time }}:00</div>
+                                    <div class="journey-value">{{ step.from.name }}</div>
                                 </div>
                                 <div class="journey-col">
                                     <div class="journey-desc-time">时长 {{ step.duration }}h</div>
                                     <div class="journey-desc-risk">风险 {{ step.risk }}</div>
                                 </div>
                                 <div class="journey-col">
-                                    <div class="journey-field">目的地</div>
-                                    <div class="journey-value">{{ step.dest }}</div>
+                                    <div class="journey-field">{{ step.arrive_time }}:00</div>
+                                    <div class="journey-value">{{ step.to.name }}</div>
                                 </div>
-                            </div>
+                            </div> -->
                         </div>
                     </div>
                 </li>
@@ -185,28 +185,28 @@
                     <h4>添加新的旅程</h4>
                     <div class="row">
                         <div class="input-field col s12">
-                            <input disabled value="010" id="input_traveler-id" type="text" class="validate">
+                            <input disabled v-bind:value="nextTid.pad(3)" id="input_traveler-id" type="text"
+                                class="validate">
                             <label for="disabled">旅客编号</label>
                         </div>
-                        <div class="input-field col s12">
-                            <select v-model="newJourney.src">
-                                <option v-for="city in cities" value="city.name">{{ city.name }}</option>
-                            </select>
+                        <div class="col s12">
                             <label>出发地</label>
-                        </div>
-                        <div class="input-field col s12">
-                            <select v-model="newJourney.dest">
-                                <option v-for="city in cities" value="city.name">{{ city.name }}</option>
+                            <select class="browser-default" v-model="newJourney.src">
+                                <option v-for="(city, idx) in cities" v-bind:value="idx">{{ city.name }}</option>
                             </select>
+                        </div>
+                        <div class="col s12">
                             <label>目的地</label>
-                        </div>
-                        <div class="input-field col s12">
-                            <select>
-                                <option value="1">10:00</option>
-                                <option value="2">11:00</option>
-                                <option value="3">12:00</option>
+                            <select class="browser-default" v-model="newJourney.dest">
+                                <option v-for="(city, idx) in cities" v-bind:value="idx">{{ city.name }}</option>
                             </select>
+                        </div>
+                        <div class="col s12">
                             <label>出发时间</label>
+                            <select class="browser-default" v-model="newJourney.dep_time">
+                                <option v-for="option in depTimeOptions" v-bind:value="option.value">{{ option.label }}
+                                </option>
+                            </select>
                         </div>
                         <div class="input-field col s12 add-journey-strategy-box">
                             <span class="add-journey-strategy-label">
@@ -214,22 +214,108 @@
                             </span>
                             <p>
                                 <label>
-                                    <input name="group1" type="radio" checked />
+                                    <input name="group1" type="radio" value="min_risk" v-model="newJourney.strategy" />
                                     <span>最小风险</span>
                                 </label>
                             </p>
                             <p>
                                 <label>
-                                    <input name="group1" type="radio" />
+                                    <input name="group1" type="radio" value="limited_time_min_risk"
+                                        v-model="newJourney.strategy" />
                                     <span>限时最小风险</span>
                                 </label>
                             </p>
+                        </div>
+                        <div class="input-field col s12" v-if="newJourney.strategy == 'limited_time_min_risk'">
+                            <input id="input_time-limit" v-model.number="newJourney.time_limit" type="number" class="validate">
+                            <label class="active" for="input_time-limit">时间限制</label>
+                        </div>
+                        <div class="col s12 center" v-if="cacheStatus == 'requesting'">
+                            <div class="preloader-wrapper big active">
+                                <div class="spinner-layer spinner-blue-only">
+                                    <div class="circle-clipper left">
+                                        <div class="circle"></div>
+                                    </div>
+                                    <div class="gap-patch">
+                                        <div class="circle"></div>
+                                    </div>
+                                    <div class="circle-clipper right">
+                                        <div class="circle"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col s12" v-if="cacheStatus == 'okay' && !cachedJourney.error">
+                            <div class="journey-preview-overview-box">
+                                <div class="journey-col">
+                                    <div class="journey-field">旅客编号</div>
+                                    <div class="journey-value">{{ processedCachedJourney.tid }}</div>
+                                </div>
+                                <div class="journey-col">
+                                    <div class="journey-field">day {{ processedCachedJourney.day }},
+                                        {{ processedCachedJourney.dep_time }}:00</div>
+                                    <div class="journey-value">{{ processedCachedJourney.src.name }}</div>
+                                </div>
+                                <div class="journey-col">
+                                    <div class="journey-desc-time">时长 {{ processedCachedJourney.length }}h</div>
+                                    <div class="journey-desc-risk">风险 {{ processedCachedJourney.risk }}</div>
+                                </div>
+                                <div class="journey-col">
+                                    <div class="journey-field">day {{ processedCachedJourney.arrive_day }},
+                                        {{ processedCachedJourney.arrive_time }}:00
+                                    </div>
+                                    <div class="journey-value">{{ processedCachedJourney.dest.name }}</div>
+                                </div>
+                            </div>
+                            <div class="journey-content">
+                                <div class="journey-preview-overview-box"
+                                    v-for="(step, index) in processedCachedJourney.route">
+                                    <div class="journey-step-number">#{{ index + 1 }}</div>
+                                    <div class="journey-step journey-step-normal">
+                                        <div class="journey-col">
+                                            <div class="journey-field">交通工具</div>
+                                            <div class="journey-value">{{ typeNames[step.type] }}</div>
+                                        </div>
+                                        <div class="journey-col">
+                                            <div class="journey-field">{{ step.dep_time }}:00</div>
+                                            <div class="journey-value">{{ step.from.name }}</div>
+                                        </div>
+                                        <div class="journey-col">
+                                            <div class="journey-desc-time">时长 {{ step.duration }}h</div>
+                                            <div class="journey-desc-risk">风险 {{ step.risk }}</div>
+                                        </div>
+                                        <div class="journey-col">
+                                            <div class="journey-field">{{ step.arrive_time }}:00</div>
+                                            <div class="journey-value">{{ step.to.name }}</div>
+                                        </div>
+                                    </div>
+                                    <!-- <div class="journey-step journey-step-finished" v-else>
+                                <div class="journey-col">
+                                    <div class="journey-field">交通工具</div>
+                                    <div class="journey-value">{{ typeNames[step.type] }}</div>
+                                </div>
+                                <div class="journey-col">
+                                    <div class="journey-field">{{ step.dep_time }}:00</div>
+                                    <div class="journey-value">{{ step.from.name }}</div>
+                                </div>
+                                <div class="journey-col">
+                                    <div class="journey-desc-time">时长 {{ step.duration }}h</div>
+                                    <div class="journey-desc-risk">风险 {{ step.risk }}</div>
+                                </div>
+                                <div class="journey-col">
+                                    <div class="journey-field">{{ step.arrive_time }}:00</div>
+                                    <div class="journey-value">{{ step.to.name }}</div>
+                                </div>
+                            </div> -->
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <a class="waves-effect waves-green btn-flat" v-on:click="handleAddCancelButtonClick">取消</a>
-                    <a class="waves-effect waves-green btn-flat">添加</a>
+                    <a class="waves-effect waves-green btn-flat" v-on:click="handleConfirmButtonClick"
+                        v-bind:disabled="cacheStatus == 'outdated' || cacheStatus == 'requesting'">添加</a>
                 </div>
             </div>
         </div>
