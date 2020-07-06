@@ -63,9 +63,17 @@ lib.get_line_duration.restype = ctypes.c_int
 lib.init_min_risk_spfa_solver.argtypes = [ctypes.c_void_p]
 lib.init_min_risk_spfa_solver.restype = ctypes.c_void_p
 
+# init_limited_time_min_risk_solver
+lib.init_limited_time_min_risk_solver.argtypes = [ctypes.c_void_p]
+lib.init_limited_time_min_risk_solver.restype = ctypes.c_void_p
+
 # run_solver
 lib.run_solver.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_int, ctypes.c_int]
 lib.run_solver.restype = ctypes.c_void_p
+
+# maybe_run_solver
+lib.maybe_run_solver.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int]
+lib.maybe_run_solver.restype = ctypes.c_void_p
 
 # deinit_solver
 # void deinit_solver(solver_t *solver);
@@ -101,6 +109,10 @@ lib.get_journey_risk.restype = ctypes.c_double
 lib.get_journey_route.argtypes = [ctypes.c_void_p]
 lib.get_journey_route.restype = ctypes.c_void_p
 
+# get_journey_step_risk
+lib.get_journey_step_risk.argtypes = [ctypes.c_void_p]
+lib.get_journey_step_risk.restype = ctypes.c_void_p
+
 # deinit_journey
 lib.deinit_journey.argtypes = [ctypes.c_void_p]
 lib.deinit_journey.restype = ctypes.c_void_p
@@ -118,3 +130,27 @@ lib.get_vector_length.restype = ctypes.c_int
 # deinit_int_vector
 lib.deinit_int_vector.argtypes = [ctypes.c_void_p]
 lib.deinit_int_vector.restype = ctypes.c_void_p
+
+# get_double_at
+lib.get_double_at.argtypes = [ctypes.c_void_p, ctypes.c_int]
+lib.get_double_at.restype = ctypes.c_double
+
+# get_dvector_length
+lib.get_dvector_length.argtypes = [ctypes.c_void_p]
+lib.get_dvector_length.restype = ctypes.c_int
+
+# deinit_double_vector
+lib.deinit_double_vector.argtypes = [ctypes.c_void_p]
+lib.deinit_double_vector.restype = ctypes.c_void_p
+
+# get_result_valid
+lib.get_result_valid.argtypes = [ctypes.c_void_p]
+lib.get_result_valid.restype = ctypes.c_bool
+
+# get_result_journey
+lib.get_result_journey.argtypes = [ctypes.c_void_p]
+lib.get_result_journey.restype = ctypes.c_void_p
+
+# deinit_result
+lib.deinit_result.argtypes = [ctypes.c_void_p]
+lib.deinit_result.restype = ctypes.c_void_p

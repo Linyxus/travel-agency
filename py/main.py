@@ -19,6 +19,14 @@ def show_msg(msg):
         return f'<list journey>'
     elif msg['type'] == 'plan':
         return f"<plan: {msg['data']['dep_time']} {msg['data']['src']} -> {msg['data']['dest']}, {msg['data']['strategy']}>"
+    elif msg['type'] == 'add journey':
+        return f"<add journey: jid={msg['data']['jid']}>"
+
+
+def show_reply(msg):
+    if msg['type'] == 'list line reply':
+        return f"<list line reply: {len(msg['data'])} lines>"
+    # pick up here
 
 
 def city_list():
@@ -70,17 +78,26 @@ def conv_journey_record(rec: JourneyRecord):
         'src': rec.journey.src,
         'dest': rec.journey.dest,
         'length': rec.journey.length,
-        'risk': rec.journey.risk,
+        'risk': int(rec.journey.risk * 10) / 10,
         'route': rec.journey.route,
+        'step_risk': rec.journey.step_risk,
         'dep_time': rec.journey.dep_time,
     }
 
 
 def plan(info):
-    rec = agency.plan(info['tid'], info['src'], info['dest'],
-                      info['day'], info['dep_time'], info['strategy'])
-    ret = conv_journey_record(rec)
+    if type(info['time_limit']) is not int:
+        return json.dumps({'type': 'plan nak'})
 
+    if info['time_limit'] < 0:
+        return json.dumps({'type': 'plan nak'})
+
+    rec = agency.plan(info['tid'], info['src'], info['dest'],
+                      info['day'], info['dep_time'], info['time_limit'], info['strategy'])
+    if rec is None:
+        return json.dumps({'type': 'plan nak'})
+
+    ret = conv_journey_record(rec)
     return json.dumps({
         'type': 'plan reply',
         'data': ret
@@ -129,7 +146,6 @@ async def serve(ws, path):
     register(ws)
     try:
         async for msg in ws:
-            msg = json.loads(msg)
             logging.info(f'receive request {show_msg(msg)}')
             if msg['type'] == 'list city':
                 await list_city_reply(ws)
@@ -138,9 +154,10 @@ async def serve(ws, path):
             if msg['type'] == 'list journey':
                 await list_journey_reply(ws)
             if msg['type'] == 'plan':
-                await plan_reply(msg['data'])
+                await plan_reply(ws, msg['data'])
             if msg['type'] == 'add journey':
                 add_journey(msg['data']['jid'])
+                await asyncio.wait([list_journey_reply(x) for x in clients])
     finally:
         unregister(ws)
 
@@ -157,8 +174,9 @@ if __name__ == '__main__':
     start_server = websockets.serve(serve, '127.0.0.1', 5678)
     logging.info('start websocket server')
 
-    rec = agency.plan('001', 0, 4, 0, 8, 'min_risk')
-    add_journey(rec.jid)
+    # rec = agency.plan('001', 0, 4, 0, 8, None, 'min_risk')
+    # print(rec)
+    # add_journey(rec.jid)
 
     asyncio.get_event_loop().run_until_complete(start_server)
     asyncio.get_event_loop().run_forever()
