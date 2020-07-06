@@ -61,4 +61,5 @@ namespace tagc
         CityInfo read_city_info(std::ifstream &fs);
         std::pair<std::vector<Line>, LineInfo> read_line_info(std::ifstream &fs, size_t num_cities);
     } // namespace io
+    
 } // namespace tagc

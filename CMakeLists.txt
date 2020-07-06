@@ -12,7 +12,7 @@ add_library(travel_agency
         include/Const.hh
         src/CityMap.cc
         src/Journey.cc
-        include/Solver.h
+        include/Solver.hh
         src/Solver.cc src/c_wrapper.cc)
 
 target_include_directories(
@@ -62,7 +62,8 @@ add_executable(test_main
         test/test_linked_list.cc
         test/test_city_map.cc
         test/test_journey.cc
-        test/test_min_risk_spfa_solver.cc)
+        test/test_min_risk_spfa_solver.cc
+        test/test_limited_time_min_risk_solver.cc)
 
 target_link_libraries(test_main gtest_main)
 target_link_libraries(test_main travel_agency)

@@ -20,6 +20,7 @@ namespace tagc {
         _dep_time = dep_time;
         _arrive_time = dep_time;
         _risk = 0;
+        _step_risk = 0;
         _length = 0;
         _next = shared_ptr<const Journey>(nullptr);
     }
@@ -41,6 +42,7 @@ namespace tagc {
         _risk = rem->_risk;
         _risk += time_between(rem->_arrive_time, line.dep_time) * risk_of_level(city.level);
         _risk += risk_of_line(line.type) * line.duration * risk_of_level(city.level);
+        _step_risk = _risk - rem->_risk;
 
         _length = rem->_length + line.duration;
         _length += time_between(rem->_arrive_time, line.dep_time);
@@ -55,6 +57,17 @@ namespace tagc {
 
         auto ret = _next->to_line_id_list();
         ret.push_back(_line_id);
+
+        return ret;
+    }
+
+    std::vector<double> Journey::to_step_risk_list() const {
+        if (!_next) {
+            return std::vector<double>{};
+        }
+
+        auto ret = _next->to_step_risk_list();
+        ret.push_back(_step_risk);
 
         return ret;
     }

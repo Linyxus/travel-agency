@@ -21,9 +21,11 @@ namespace tagc
         DepTime dep_time() const { return _dep_time; }
         DepTime arrive_time() const { return _arrive_time; }
         double risk() const { return _risk; }
+        double step_risk() const { return _step_risk; }
         int length() const { return _length; }
 
         std::vector<LineId> to_line_id_list() const;
+        std::vector<double> to_step_risk_list() const;
 
       private:
         const CityMap *_city_map;
@@ -33,6 +35,7 @@ namespace tagc
         DepTime _dep_time;
         DepTime _arrive_time;
         double _risk;
+        double _step_risk;
         Duration _length;
         std::shared_ptr<const Journey> _next;
     };
