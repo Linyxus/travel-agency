@@ -7,7 +7,6 @@ add_library(travel_agency
         include/CityMap.hh
         include/LinkedList.hh
         include/Journey.hh
-        include/TravelAgency.hh
         include/travel_agency.h
         include/Const.hh
         src/CityMap.cc
