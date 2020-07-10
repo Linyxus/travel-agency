@@ -146,6 +146,7 @@ async def serve(ws, path):
     register(ws)
     try:
         async for msg in ws:
+            msg = json.loads(msg)
             logging.info(f'receive request {show_msg(msg)}')
             if msg['type'] == 'list city':
                 await list_city_reply(ws)
