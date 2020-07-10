@@ -3,6 +3,7 @@ import json
 import websockets
 from argparse import ArgumentParser
 import logging
+import os.path as osp
 
 from agency_server import AgencyServer
 from travel_agency import LineType, JourneyRecord
@@ -21,13 +22,6 @@ def show_msg(msg):
         return f"<plan: {msg['data']['dep_time']} {msg['data']['src']} -> {msg['data']['dest']}, {msg['data']['strategy']}>"
     elif msg['type'] == 'add journey':
         return f"<add journey: jid={msg['data']['jid']}>"
-
-
-def show_reply(msg):
-    if msg['type'] == 'list line reply':
-        return f"<list line reply: {len(msg['data'])} lines>"
-    # pick up here
-
 
 def city_list():
     return json.dumps({
@@ -139,6 +133,7 @@ async def plan_reply(ws, info):
 
 
 def add_journey(jid):
+    logging.info(f'add journey with jid={jid}')
     agency.journey_list.append(jid)
 
 
@@ -174,6 +169,9 @@ if __name__ == '__main__':
 
     start_server = websockets.serve(serve, '127.0.0.1', 5678)
     logging.info('start websocket server')
+    fileDir = osp.dirname(osp.abspath(__file__))
+    pagePath = osp.join(fileDir, '..', 'gui', 'index.html')
+    logging.info(f'please open the app at file://{pagePath}')
 
     # rec = agency.plan('001', 0, 4, 0, 8, None, 'min_risk')
     # print(rec)
