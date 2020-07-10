@@ -17,6 +17,7 @@ const tagc::CityLine &tagc::CityMap::lines_of(CityId city) const {
     return this->_line_info[city];
 }
 
+// 打开并读取城市线路图
 tagc::CityMap tagc::io::load_city_map(const std::string &path) {
     std::ifstream fs;
     fs.open(path, std::ios::in);
@@ -30,6 +31,7 @@ tagc::CityMap tagc::io::load_city_map(const std::string &path) {
     return CityMap{ city_info, lines, line_info };
 }
 
+// 从给定的文件流读取城市信息
 tagc::CityInfo tagc::io::read_city_info(std::ifstream &fs) {
     CityInfo ret;
 
@@ -45,6 +47,7 @@ tagc::CityInfo tagc::io::read_city_info(std::ifstream &fs) {
     return ret;
 }
 
+// 从给定的文件流读取线路信息
 std::pair<std::vector<tagc::Line>, tagc::LineInfo> tagc::io::read_line_info(std::ifstream &fs, size_t num_cities) {
     std::vector<Line> lines;
     LineInfo ret(num_cities, CityLine{});

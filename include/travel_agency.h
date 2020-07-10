@@ -4,6 +4,8 @@
 extern "C" {
 #endif
 
+// 本文件为C接口文件。将C++的各种类方法与类的构造、释放包装为C API，编译导出为动态库。
+
 typedef struct city_map city_map_t;
 typedef struct solver solver_t;
 typedef struct journey journey_t;

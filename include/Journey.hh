@@ -10,10 +10,13 @@ namespace tagc
 {
     class Journey;
 
+    // 旅行方案数据结构
     class Journey
     {
     public:
+        // 初始化节点
         Journey(CityId cid, DepTime dep_time, const CityMap *city_map);
+        // 从已有的方案延展出新的方案
         Journey(LineId lid, std::shared_ptr<const Journey> rem);
 
         CityId src() const { return _src; }

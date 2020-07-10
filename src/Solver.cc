@@ -24,10 +24,13 @@ namespace tagc {
         }
     }
 
+    // 状态节点：( 当前城市, 当前时间 )
     typedef std::pair<CityId, DepTime> Node;
 
     Result MinRiskSPFASolver::_solve(CityId src, DepTime dep_time, CityId dest, Duration time_limit) {
         std::queue<Node> q;
+
+        // 初始节点
         _cache[src][dep_time] = std::make_shared<Journey>(src, dep_time, &_city_map);
         _in_queue[src][dep_time] = true;
 
@@ -42,6 +45,7 @@ namespace tagc {
             auto now = u.second;
             _in_queue[cid][now] = false;
 
+            // 遍历从该点出发的所有边
             for (auto it = _city_map.lines_of(cid).cbegin(); it != _city_map.lines_of(cid).cend(); it++) {
                 auto line = *it;
                 auto j = std::make_shared<Journey>(line.id, _cache[cid][now]);
@@ -56,7 +60,7 @@ namespace tagc {
             }
         }
 
-        // Find out the final answer
+        // 寻找最终答案
         Journey ret(0, 0, &_city_map);
         bool found = false;
         for (const auto &pj : _cache[dest]) {
@@ -97,6 +101,7 @@ namespace tagc {
         }
     }
 
+    // 状态节点，( 所在城市, 所用时间 )
     typedef std::pair<CityId, Duration> LNode;
     Result LimitedTimeRiskSolver::_solve(CityId src, DepTime dep_time, CityId dest, Duration time_limit) {
         _reinit(time_limit);
@@ -105,6 +110,7 @@ namespace tagc {
         _in_queue[src][0] = true;
         q.push({ src, 0 });
 
+        // 运行SPFA算法
         while (!q.empty()) {
             const auto &[cid, l] = q.front(); q.pop();
             _in_queue[cid][l] = false;

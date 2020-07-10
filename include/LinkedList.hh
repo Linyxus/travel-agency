@@ -2,8 +2,11 @@
 
 namespace tagc
 {
+    // 链表
     template <typename T>
     class LinkedList;
+
+    // 链表中新的节点
     template <typename T>
     class LinkedListNode;
 
@@ -18,6 +21,7 @@ namespace tagc
 
     namespace linked_list
     {
+        // 链表迭代器
         template <typename T>
         class iterator
         {
@@ -49,6 +53,7 @@ namespace tagc
             LinkedListNode<T> *_p;
         };
 
+        // 链表常量迭代器
         template <typename T>
         class const_iterator
         {
@@ -113,7 +118,9 @@ namespace tagc
     public:
         LinkedList();
         ~LinkedList();
+        // 在头部插入元素
         void push(const T &val);
+        // 在尾部添加元素
         void append(const T &val);
 
         LinkedList(const LinkedList<T> &other)
