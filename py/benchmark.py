@@ -121,6 +121,10 @@ if __name__ == '__main__':
     print(f'all: time avg {stats.mean(0)[0]} max {stats.max(0)[0]} min {stats.min(0)[0]}')
     print(f'all: mem avg {show_bytes(stats.mean(0)[1])} max {show_bytes(stats.max(0)[1])} min {show_bytes(stats.min(0)[1])}')
 
+    print(f'最小风险 & {mr_stats.mean(0)[0] * 1000:.2f} & {mr_stats.max(0)[0] * 1000:.2f} & {mr_stats.min(0)[0] * 1000:.2f} & {mr_stats.mean(0)[1] / 1024 / 1024:.2f} & {mr_stats.max(0)[1] / 1024 / 1024:.2f} & {mr_stats.min(0)[1] / 1024 / 1024:.2f} \\\\')
+    print(f'限时最小风险 & {ltmr_stats.mean(0)[0] * 1000:.2f} & {ltmr_stats.max(0)[0] * 1000:.2f} & {ltmr_stats.min(0)[0] * 1000:.2f} & {ltmr_stats.mean(0)[1] / 1024 / 1024:.2f} & {ltmr_stats.max(0)[1] / 1024 / 1024:.2f} & {ltmr_stats.min(0)[1] / 1024 / 1024:.2f} \\\\')
+    print(f'全部 & {stats.mean(0)[0] * 1000:.2f} & {stats.max(0)[0] * 1000:.2f} & {stats.min(0)[0] * 1000:.2f} & {stats.mean(0)[1] / 1024 / 1024:.2f} & {stats.max(0)[1] / 1024 / 1024:.2f} & {stats.min(0)[1] / 1024 / 1024:.2f} \\\\')
+
     mr_solver.free()
     ltmr_solver.free()
     cm.free()
