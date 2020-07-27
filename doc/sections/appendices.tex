@@ -1,0 +1,129 @@
+\section{工程的编译与运行}
+\label{sec:compile-and-run}
+
+\subsection{环境要求}
+
+以下是编译、运行所需要的工具要求：
+\begin{itemize}
+  \item Chrome 83+
+  \item Python 3.7+
+  \item CMake 3.17
+  \item Ninja 1.10
+\end{itemize}
+
+Python依赖的第三方包如下：
+\begin{enumerate}
+  \item websockets 8.1
+\end{enumerate}
+
+项目的开发、测试环境为 macOS Catalina 10.15.5。\textbf{注意：在\texttt{./py/\_travel\_agency.py}文件中，硬编码了动态链接库的位置。在macOS下动态链接库的后缀名为\texttt{.dylib}，如果在Windows下或者Linux下运行代码，要在编译动态库后将动态库文件名相应修改。}
+
+\subsection{编译方法}
+
+本项目中，C++算法核心部分使用CMake + Ninja工具链进行编译。前端界面与Python服务器均无需编译。C++动态库的编译过程如下。
+
+首先，调用CMake生成编译文件。在项目根目录执行下列指令。
+\begin{verbatim}
+mkdir -p build/default
+cd build/default
+cmake -GNinja -DBUILD_SHARED_LIBS=ON ../..
+\end{verbatim}
+
+随后，调用Ninja进行编译。同样在项目根目录执行下列指令。
+\begin{verbatim}
+cd build/default
+ninja
+\end{verbatim}
+
+Ninja将打印出编译的过程与结果。若编译顺利，\texttt{./build/default/} 文件夹内将生成动态库文件。
+
+\textbf{注意：如果在Windows下编译，若发现编译产生的DLL文件出现了乱码现象，则需要在 \texttt{./src/travel\_agency.hh}文件中的函数定义中添加 \lstinline{\_\_declspec(dllexport)}宏。在类Unix环境下，只需要将函数定义包裹在 \lstinline{extern "C"} 中，编译器就不会对导出的函数名进行修饰，而在Windows下，添加上述宏是必要的。由于本项目在 macOS 下开发，因而没有添加这些宏。如果着手自己编译，需要注意这一点。}
+
+\subsection{运行方法（预编译的Windows可执行文件）}
+
+提交的文件中已经包含了预编译的Windows可执行文件。只需要双击运行，\textbf{并且根据给出的提示在浏览器中打开相应网页}即可以运行系统。
+
+\subsection{运行方法（自行编译）}
+
+在运行之前，请保证：
+\begin{enumerate}
+  \item 动态链接库已经正确编译，产生在\texttt{./build/default/}文件夹内。在Windows下，为\texttt{.dll}后缀的文件，在Linux下，为\texttt{.so}，在macOS下，为\texttt{.dylib}；
+  \item 如果在Windows下或Linux下运行程序，需要根据编译生成的动态库路径，修改\texttt{./py/\_travel\_agency.py}文件中动态库的位置。
+  \item 如果在Windows下运行程序，需要确保Python版本为3.7。若产生DLL加载错误，则很有可能是依赖的DLL没有放在Python的DLL加载路径中，如 \lstinline{libstdc++}等等。需要找寻到对应的DLL并放入加载目录。
+\end{enumerate}
+
+首先，运行Python服务器。
+\begin{verbatim}
+cd py
+python main.py
+\end{verbatim}
+
+然后，在浏览器（推荐使用新版本的Chrome）中打开\texttt{./gui/index.html}文件。这可以通过打开链接：\texttt{file:///\$PROJECT\_PATH/gui/index.html}来实现。其中\texttt{\$PROJECT\_PATH}为项目文件夹所在路径。网页界面将自动连接服务器。系统开始运行。
+
+\section{系统使用说明}
+\label{sec:manual}
+
+系统界面分为两个部分：地图与信息面板。地图上能够显示城市信息、旅程详细信息与状态等。信息面板则呈现各类信息，包括事件、旅行列表，也有添加按钮。接下来分点详细阐释系统功能与使用方法。
+
+\textbf{查看城市信息。} \quad 在界面的地图部分上，用圆圈标出了系统支持的旅行城市。圆圈上方为城市名称。圆圈的颜色代表了城市的风险等级：\textit{{\color{high-risk}红色}}代表高风险地区；\textit{{\color{mid-risk}黄色}}代表中风险地区；\textit{{\color{low-risk}绿色}}代表低风险地区。
+
+\textbf{查看时间信息、控制时间运行。} \quad 信息面板的上方给出了系统的当前时间。系统时间从第 0 天 0 时开始，以固定的间隔，以1小时为单位向前推进。下面的按钮能够暂停、重启系统时间的运行。
+
+\definecolor{air}{HTML}{a0c4ff}
+\definecolor{subway}{HTML}{457b9d}
+\definecolor{highway}{HTML}{1d3557}
+
+\textbf{旅行列表、查看旅行详情。} \quad 信息面板时间的下方，为旅行列表。旅行列表中的每一项都是正在进行中的旅程。列表中每一项都给出了旅程的简要信息，包括：旅客编号、出发时间、出发地点、到达时间、目的地点、旅行时长、旅行风险。点击列表中的某一项，将显示该旅程的详细信息，包括每一步搭乘的线路信息，线路时长，在线路中产生的风险等。同时，地图中将绘制出该条线路的详细路径。并且以灰色圆形指示旅客当前所处位置。绘制的路径中，\textit{\color{air}天蓝色}代表飞机，\textit{\color{subway}青色}代表火车，\textit{\color{highway}靛色}代表公路。将鼠标移到旅客标识上，将显示旅客状态。
+
+\textbf{添加旅程。} \quad 点击右下角按钮，将打开添加旅程窗口，窗口打开后，将自动暂停系统时间。在窗口中需要输入旅程信息、选择旅行策略。当所有信息都被输入且合法时，将显示旅行预览，更新信息，旅行预览也会更新。当信息有问题（出发地、目的地相同，或找不到可行的方案）时，旅行预览不会显示。点击确认按钮，若信息无问题，系统将旅行添加到列表内；若信息有问题，将产生提示。点击取消按钮，将返回到主界面，输入的信息将被丢弃。
+
+\textbf{查看系统日志。} \quad 在Python服务器终端内，可以看到系统日志。系统日志将打印出客户端的连接、断开信息；客户端的请求、服务器的响应信息；运行规划算法的信息与耗时；其他提示信息等。
+
+\section{性能测试}
+\label{sec:perf-test}
+
+\begin{table}[t]
+  \centering
+  \resizebox{\textwidth}{!}{%
+  \begin{tabular}{c|cccccc}
+    \toprule
+    项目 & 平均用时 (ms) & 最大用时 (ms) & 最小用时 (ms) & 平均空间 (MiB) & 最大空间 (MiB) & 最小空间 (MiB) \\
+    \midrule
+最小风险 & 18.10 & 29.84 & 10.44 & 70.39 & 71.53 & 64.89 \\
+限时最小风险 & 33.42 & 58.50 & 8.58 & 115.06 & 129.33 & 71.38 \\
+全部 & 25.76 & 58.50 & 8.58 & 92.73 & 129.33 & 64.89 \\
+    \bottomrule
+  \end{tabular}%
+  }
+  \caption{在随机生成的$10^4$座城市，$10^5$条线路的地图上的性能测试表现}
+  \label{tab:perf-test}
+\end{table}
+
+为了进一步验证系统效率，我随机生成了大规模的城市图，在上面运行系统的规划算法，测量不同策略的规划时间与内存消耗。具体地，将城市数设为$10^4$，并随机生成$10^5$条线路，每种策略运行100次，性能测试的结果在表 \ref{tab:perf-test} 中给出。从中可以看出，在这一大规模的图上进行规划，算法仍然能够以非常快地速度给出结果，证明了系统中算法的高效性。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

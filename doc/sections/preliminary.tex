@@ -1,0 +1,83 @@
+\section{背景}
+\label{sec:preliminary}
+
+\paragraph{系统背景}
+
+\textsc{TravelAgency}的背景是在新冠疫情环境下，对低风险旅行的规划与模拟。新冠疫情以来，全国上下团结一心，共同抵抗疫情，然而也未出行带来的诸多不便。如今疫情已经受到控制，然而出行仍然具有一定风险。\textsc{TravelAgency}旨在根据城市风险等级、线路信息等条件，为用户规划出合理的、有或没有时间限制的最低风险路线。
+
+\paragraph{城市风险等级与等待风险}
+
+系统假设城市风险分为三级：高风险、中风险、低风险。且具有各自的风险系数，如表 \ref{tab:city-level-risk} 所示。
+\begin{table}[h]
+\centering
+\begin{tabular}{cccc}
+\toprule
+风险等级 & 低 & 中 & 高 \\
+\midrule
+风险系数 & 0.2 & 0.3 & 0.9 \\
+\bottomrule
+\end{tabular}
+\caption{城市风险系数表}
+\label{tab:city-level-risk}
+\end{table}
+
+假设某一旅客在$t_a$到达城市$c$，城市$c$具有风险系数$r_c$，且他下面要进行的旅行线路在$t_d$出发。则因等待而产生的风险定义为
+\begin{equation}
+  R_w \triangleq \| t_d - t_a \| \cdot r_c,
+\end{equation}
+其中，$\| t_d - t_a \| \triangleq (t_d - t_a + 24) \% 24$为需要等待的时间。
+
+\paragraph{线路信息与路程风险}
+
+系统假设一条线路由如下信息定义：出发地点、目的地点、出发时间、所用时长、类型。系统假设所有系统都以一天为周期重复，因而任一线路的出发时间$t_d$满足$t_d = 0, 1, 2, \cdots, 23$。线路时长没有限制。线路类型有三种：飞机、火车、客车。不同类型的线路具有不同的风险系数，如表 \ref{tab:line-type-risk} 所示。
+\begin{table}[h]
+\centering
+\begin{tabular}{cccc}
+\toprule
+线路类型 & 客车 & 火车 & 飞机 \\
+\midrule
+风险系数 & 2 & 3 & 9 \\
+\bottomrule
+\end{tabular}
+\caption{线路风险系数表}
+\label{tab:line-type-risk}
+\end{table}
+
+而假设某一线路$l$从城市$c$出发，时长为$\tau$。$l$和$c$分别具有风险系数$r_l$与$r_c$。则此条线路带来的路程风险定义为
+\begin{equation}
+  R_t \triangleq r_l \tau r_c.
+\end{equation}
+
+\paragraph{城市地图}
+
+将城市信息与线路信息建模为一张图，定义$\mathcal G = (\mathcal V, \mathcal E, r_c, r_l, t_d, t_a, \tau, v_s, v_d)$。其中$\mathcal V = \{ c_1, c_2, \cdots, c_n \}$为城市集合，$\mathcal E = \{ l_1, l_2, \cdots, l_k \}$为线路集合。$r_c : \mathcal V \rightarrow \mathds R$为城市到其风险系数的映射。$r_l : \mathcal E \rightarrow \mathds R$为线路到其风险系数的映射。$t_d, t_a : \mathcal E \rightarrow \{ 0, 1, \cdots, 23 \}$为线路到其出发、到达时间的映射。$\tau : \mathcal E \rightarrow \mathds N_+$为线路到其时长的映射。而$v_s, v_d : \mathcal E \rightarrow \mathcal V$为线路到其出发、目的城市的映射。可以知道，一般来说这张图是有向多重图。
+
+\paragraph{旅行规划与两种策略}
+
+系统需要解决的是低风险旅行规划问题。假设某一旅客在$t_0$时从城市$c_0$出发，希望到达城市$c$。系统需要模拟规划出旅程，经过线路$l_0, l_1, l_2, \cdots, l_k$。可以知道这些线路满足：$v_d(l_i) = v_s(l_{i+1}), i = 0, 1, \cdots, k-1$，且$v_s(l_0) = c_0$，$v_d(l_k) = c$。而总风险可以写为
+\begin{equation}
+  R(l_0, l_1, \cdots, l_k) = \sum_{i=0}^k \left[ \tau_i r_c(c_i) + r_l(l_i) \tau(l_i) r_c(c_i) \right],
+\end{equation}
+其中，$\tau_i$为等待时间，有$\tau_0 = \| t_d(l_0) - t_0 \|, \tau_i = \| t_d(l_i) - t_a(l_{i-1}) \|, i = 1, 2, \cdots, k-1$。而$c_i = v_s(l_i), i = 0, 1, \cdots, k$为出发城市。系统需要找到符合条件的线路列表，使得$R$最小，也即如下的最优化问题
+\begin{equation}
+  \begin{aligned}
+    \min_{l_0, \cdots, l_k} \quad & R(l_0, l_1, \cdots, l_k) \\
+    \text{s. t.} \quad & v_d(l_i) = v_s(l_{i+1}), i = 0, 1, \cdots, k-1 \\
+    & v_s(l_0) = c_0, v_d(l_k) = c \\
+  \end{aligned}
+\end{equation}
+而对于带有时间约束的最小风险策略，旅途总时长可以类似地写为
+\begin{equation}
+  T(l_0, l_1, \cdots, l_k) = \sum_{i=0}^k \left[ \tau_i + \tau(l_i) \right].
+\end{equation}
+假设有时间约束$T \le \Gamma$，则限时最小风险策略可以被认为是求解下列最优化问题
+\begin{equation}
+  \begin{aligned}
+    \min_{l_0, \cdots, l_k} \quad & R(l_0, l_1, \cdots, l_k) \\
+    \text{s. t.} \quad & v_d(l_i) = v_s(l_{i+1}), i = 0, 1, \cdots, k-1 \\
+    & v_s(l_0) = c_0, v_d(l_k) = c \\
+    & T(l_0, l_1, \cdots, l_k) \le \Gamma \\
+  \end{aligned}
+\end{equation}
+
+
