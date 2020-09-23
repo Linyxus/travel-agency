@@ -1,5 +1,8 @@
-# travel-agency
- Min-risk travel planer in COVID-19.
+![screenshot](doc/figures/screenshot_overview.png)
+
+# TravelAgency
+
+Min-risk travel planer in COVID-19.
 
 ## Credits
 
